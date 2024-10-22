@@ -4,8 +4,8 @@ import os
 import shutil
 import torch
 import os.path as osp
-from yolov6.utils.events import LOGGER
-from yolov6.utils.torch_utils import fuse_model
+from detectors.intelligentAlgorithm.yolov6.yolov6.utils.events import LOGGER
+from detectors.intelligentAlgorithm.yolov6.yolov6.utils.torch_utils import fuse_model
 
 
 def load_state_dict(weights, model, map_location=None):
@@ -19,10 +19,12 @@ def load_state_dict(weights, model, map_location=None):
     return model
 
 
-def load_checkpoint(weights, map_location=None, inplace=True, fuse=True):
+def load_checkpoint(weights, map_location=None, inplace=False, fuse=True):
     """Load model from checkpoint file."""
     LOGGER.info("Loading checkpoint from {}".format(weights))
-    ckpt = torch.load(weights, map_location=map_location)  # load
+    import sys
+    sys.path.insert(0, "detectors/intelligentAlgorithm/yolov6")
+    ckpt = torch.load(weights, map_location=map_location, weights_only=False)  # load
     model = ckpt['ema' if ckpt.get('ema') else 'model'].float()
     if fuse:
         LOGGER.info("\nFusing model...")

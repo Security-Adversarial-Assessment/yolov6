@@ -13,12 +13,12 @@ from pathlib import Path
 from PIL import ImageFont
 from collections import deque
 
-from yolov6.utils.events import LOGGER, load_yaml
-from yolov6.layers.common import DetectBackend
-from yolov6.data.data_augment import letterbox
-from yolov6.data.datasets import LoadData
-from yolov6.utils.nms import non_max_suppression
-from yolov6.utils.torch_utils import get_model_info
+from detectors.intelligentAlgorithm.yolov6.yolov6.utils.events import LOGGER, load_yaml
+from detectors.intelligentAlgorithm.yolov6.yolov6.layers.common import DetectBackend
+from detectors.intelligentAlgorithm.yolov6.yolov6.data.data_augment import letterbox
+from detectors.intelligentAlgorithm.yolov6.yolov6.data.datasets import LoadData
+from detectors.intelligentAlgorithm.yolov6.yolov6.utils.nms import non_max_suppression
+from detectors.intelligentAlgorithm.yolov6.yolov6.utils.torch_utils import get_model_info
 
 class Inferer:
     def __init__(self, source, webcam, webcam_addr, weights, device, yaml, img_size, half):
@@ -55,10 +55,10 @@ class Inferer:
         self.files = LoadData(source, webcam, webcam_addr)
         self.source = source
 
-
-    def model_switch(self, model, img_size):
+    @staticmethod
+    def model_switch(model):
         ''' Model switch to deploy status '''
-        from yolov6.layers.common import RepVGGBlock
+        from detectors.intelligentAlgorithm.yolov6.yolov6.layers.common import RepVGGBlock
         for layer in model.modules():
             if isinstance(layer, RepVGGBlock):
                 layer.switch_to_deploy()
@@ -187,12 +187,13 @@ class Inferer:
 
         return boxes
 
-    def check_img_size(self, img_size, s=32, floor=0):
+    @staticmethod
+    def check_img_size(img_size, s=32, floor=0):
         """Make sure image size is a multiple of stride s in each dimension, and return a new shape list of image."""
         if isinstance(img_size, int):  # integer i.e. img_size=640
-            new_size = max(self.make_divisible(img_size, int(s)), floor)
+            new_size = max(Inferer.make_divisible(img_size, int(s)), floor)
         elif isinstance(img_size, list):  # list i.e. img_size=[640, 480]
-            new_size = [max(self.make_divisible(x, int(s)), floor) for x in img_size]
+            new_size = [max(Inferer.make_divisible(x, int(s)), floor) for x in img_size]
         else:
             raise Exception(f"Unsupported type of img_size: {type(img_size)}")
 
@@ -200,7 +201,8 @@ class Inferer:
             print(f'WARNING: --img-size {img_size} must be multiple of max stride {s}, updating to {new_size}')
         return new_size if isinstance(img_size,list) else [new_size]*2
 
-    def make_divisible(self, x, divisor):
+    @staticmethod
+    def make_divisible(x, divisor):
         # Upward revision the value x to make it evenly divisible by the divisor.
         return math.ceil(x / divisor) * divisor
 
